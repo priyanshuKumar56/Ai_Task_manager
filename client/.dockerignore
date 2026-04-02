@@ -6,5 +6,4 @@ npm-debug.log
 .gitignore
 .vscode
 Dockerfile
-nginx.conf
 README.md
