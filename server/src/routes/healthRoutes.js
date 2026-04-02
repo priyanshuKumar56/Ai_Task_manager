@@ -12,7 +12,9 @@ router.get('/', async (req, res) => {
   let queueStats = null;
   try {
     queueStats = await getQueueStats();
-  } catch {}
+  } catch (error) {
+    // Suppress error and return null stats
+  }
 
   const isHealthy = mongoStatus === 'healthy' && redisStatus === 'healthy';
 

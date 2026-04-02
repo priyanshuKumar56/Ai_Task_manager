@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const { validationResult } = require('express-validator');
-const { Task, TASK_OPERATIONS } = require('../models/Task');
+const { Task } = require('../models/Task');
 const { enqueueTask, cancelTask, getQueueStats } = require('../services/queueService');
 const logger = require('../utils/logger');
 

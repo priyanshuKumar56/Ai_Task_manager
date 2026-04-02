@@ -48,7 +48,7 @@ const initializeQueues = async () => {
     logger.warn({ jobId: job.id }, 'Job stalled - will be requeued');
   });
 
-  taskQueue.on('completed', (job, result) => {
+  taskQueue.on('completed', (job, _result) => {
     logger.info({ jobId: job.id, taskId: job.data?.taskId }, 'Job completed');
   });
 

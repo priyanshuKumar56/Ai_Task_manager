@@ -2,7 +2,6 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const compression = require('compression');
-const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const pinoHttp = require('pino-http');
 const logger = require('./utils/logger');

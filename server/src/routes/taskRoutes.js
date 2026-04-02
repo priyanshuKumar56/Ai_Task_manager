@@ -1,5 +1,5 @@
 const express = require('express');
-const { body, query, param } = require('express-validator');
+const { body, query } = require('express-validator');
 const {
   createTask, listTasks, getTask, getTaskLogs,
   cancelTaskHandler, retryTask, getTaskStats, streamTaskUpdates,
