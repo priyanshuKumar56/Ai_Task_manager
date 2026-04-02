@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { PlusCircle, CheckCircle2, XCircle, Clock, Loader2, Activity, TrendingUp, Zap } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
@@ -63,7 +62,7 @@ export default function DashboardPage() {
           <h1 className="text-2xl font-bold text-slate-100">
             Welcome back, <span className="text-brand-400">{user?.username}</span>
           </h1>
-          <p className="text-slate-400 text-sm mt-1">Here's your task processing overview</p>
+          <p className="text-slate-400 text-sm mt-1">Here&apos;s your task processing overview</p>
         </div>
         <Link to="/tasks/new" className="btn-primary">
           <PlusCircle size={15} /> New Task

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { taskApi } from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -44,7 +44,7 @@ export const useTaskLogs = (taskId, params = {}) => {
     queryKey: taskKeys.logs(taskId),
     queryFn: () => taskApi.getLogs(taskId, params).then(r => r.data),
     enabled: !!taskId,
-    refetchInterval: (data) => {
+    refetchInterval: (_data) => {
       // Keep polling if task is still running
       return 3000;
     },

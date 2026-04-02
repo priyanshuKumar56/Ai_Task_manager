@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { ArrowLeft, RefreshCw, XCircle, Copy, Clock, Cpu, FileText, ScrollText } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 import { useTask, useTaskLogs, useCancelTask, useRetryTask } from '../hooks/useTasks';
