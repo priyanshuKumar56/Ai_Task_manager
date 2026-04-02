@@ -33,6 +33,8 @@ const useInitAuth = () => {
   }, [accessToken]);
 };
 
+import LandingPage from './pages/LandingPage.jsx';
+
 function App() {
   useInitAuth();
   useTaskStream(); // Establish SSE connection when authenticated
@@ -40,15 +42,22 @@ function App() {
   return (
     <AnimatePresence mode="wait">
       <Routes>
+        {/* Public Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Auth Page */}
         <Route path="/auth" element={<PublicRoute><AuthPage /></PublicRoute>} />
-        <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="tasks" element={<TasksPage />} />
-          <Route path="tasks/new" element={<CreateTaskPage />} />
-          <Route path="tasks/:taskId" element={<TaskDetailPage />} />
+
+        {/* Protected Application Routes */}
+        <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/tasks" element={<TasksPage />} />
+          <Route path="/tasks/new" element={<CreateTaskPage />} />
+          <Route path="/tasks/:taskId" element={<TaskDetailPage />} />
         </Route>
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>
   );

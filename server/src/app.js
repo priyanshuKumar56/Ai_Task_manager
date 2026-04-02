@@ -34,12 +34,14 @@ app.use(helmet({
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const corsOptions = {
   origin: (origin, callback) => {
-    const allowedOrigins = process.env.ALLOWED_ORIGINS
-      ? process.env.ALLOWED_ORIGINS.split(',')
-      : ['http://localhost:3000'];
-    if (!origin || allowedOrigins.includes(origin)) {
+    const allowed = process.env.ALLOWED_ORIGINS
+      ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+      : ['http://localhost:3000', 'http://localhost:5173'];
+    
+    if (!origin || allowed.includes(origin)) {
       callback(null, true);
     } else {
+      logger.warn({ origin, allowed }, 'CORS blocked origin');
       callback(new Error('Not allowed by CORS'));
     }
   },

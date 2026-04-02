@@ -1,129 +1,87 @@
-# AI Task Processing Platform (MERN + Python + K8s)
+# 🚀 AI Task Processing Engine (MERN + Python + K8s)
 
-A production-ready AI task processing platform built for high volume, scalability, and automated GitOps deployment.
+A high-performance, production-ready AI task processing platform designed for massive horizontal scaling, real-time observability, and automated GitOps lifecycle management.
 
-**🚀 Live Application: [ai-task-manager-bakcend.onrender.com](https://ai-task-manager-bakcend.onrender.com)**
-
-## 🚀 Features
-- **MERN Stack**: Modern logic and high-performance server.
-- **Python Worker**: Background task processor (Uppercase, Lowercase, Reverse, Word Count).
-- **GitOps with Argo CD**: Continuous deployment from Infrastructure repository.
-- **Auto-Scaling**: Kubernetes HPA for worker horizontal scaling.
-- **Security First**: JWT auth, bcrypt hashing, Helmet, and Rate Limiting.
+**🌍 Live Showcase: [ai-task-manager-bakcend.onrender.com](https://ai-task-manager-bakcend.onrender.com)**
+**🎨 Frontend Interface: [ai-task-manager-sepia.vercel.app](https://ai-task-manager-sepia.vercel.app)**
 
 ---
 
-## 🛠️ Tech Stack
-- **Frontend**: React (Vite), Tailwind CSS, TanStack Query.
-- **Backend API**: Node.js, Express, Bull queue.
-- **Worker**: Python 3.12, Redis, PyMongo.
-- **Infra**: Docker, Kubernetes (k3s), Argo CD, GitHub Actions.
-- **Databases**: MongoDB (Primary), Redis (Queue/Cache).
+## 📽️ Project Vision & Purpose
+This platform was engineered to solve the "compute-heavy background job" problem in modern web apps. By decoupling the API from the heavy processing logic via a Redis-backed queue, we achieve **sub-100ms response times** even under extreme loads.
+
+### 🧩 Core Functionality
+- **Seamless Auth**: Secure JWT-based entry for all users.
+- **Task Orchestration**: Create compute-intensive tasks (Uppercase, Word Count, etc.) that run in the background.
+- **Live Observability**: Watch your tasks move from `Pending` → `Running` → `Success` in real-time.
+- **Industrial Scale**: Built to handle 100k+ tasks/day through distributed Python workers.
 
 ---
 
-## 💻 Local Development Setup
+## 🏗️ Architecture & Data Flow
+The system follows a distributed microservices pattern for maximum resilience:
 
-### Prerequisites
-- Docker & Docker Compose
-- Node.js 20+
-- Python 3.12+
+```text
+[ React Frontend ] --(1. Request)--> [ Node.js API ] --(2. Queue)--> [ Upstash Redis ]
+                                          |                         |
+(5. Live Update) <--(4. SSE Push)-- [ Mongoose DB ] <--(3. Process)-- [ Python Workers ]
+```
 
-### Running with Docker Compose
+1. **Frontend**: React-based UI captures user intent and streams status updates.
+2. **API**: Express-based gateway validates requests and publishes to the queue.
+3. **Queue**: Redis (Bull) acts as the reliable shock-absorber for high-volume spikes.
+4. **Workers**: Independent Python processes handle the "heavy lifting" and update MongoDB.
+5. **SSE (Streaming)**: The API pushes real-time "heartbeats" back to the UI.
+
+---
+
+## 🛠️ Industrial Tech Stack
+
+| Layer | Technologies | Role |
+| :--- | :--- | :--- |
+| **Frontend** | React, Vite, Tailwind CSS, Framer Motion | User interaction & real-time monitoring. |
+| **Backend** | Node.js, Express, Bull Queue, Winston | API Gateway & Job Orchestration. |
+| **Compute** | Python 3.12, PyMongo, Redis-py | Background processing engine. |
+| **Persistence** | MongoDB Atlas, Redis (Managed) | Distributed state and queue management. |
+| **Infra** | Docker, K3s, Argo CD, GitHub Actions | Automated GitOps & Orchestration. |
+
+---
+
+## ☸️ Production Deployment (Kubernetes + GitOps)
+
+### 1. The GitOps Workflow
+The system uses **Argo CD** to maintain a "Desired State" in the cluster based on a separate **Infrastructure Repository**.
+- **Application Repo**: Contains the source code and CI/CD pipelines.
+- **Infra Repo**: Contains K8s manifests (Deployments, Services, HPA).
+
+### 2. Deployment Steps
+1. Create a private infrastructure repo (`ai-task-infra`).
+2. Populate GitHub Secrets (`DOCKER_HUB_TOKEN`, `INFRA_REPO_TOKEN`).
+3. Deploy Argo CD to your cluster: `kubectl apply -n argocd -f k8s/argo-application.yaml`.
+
+---
+
+## 💻 Local Development Setup (Quick Start)
+
+### Start Everything with Docker Compose
 ```bash
 docker-compose up --build
 ```
-The application will be available at:
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:5000`
-
-### Running Services Separately
-1. Start MongoDB and Redis.
-2. `cd server && npm install && npm run dev`
-3. `cd client && npm install && npm run dev`
-4. `cd worker && pip install -r requirements.txt && python main.py`
+- **Login/Register**: `http://localhost:3000/auth`
+- **Dashboard**: `http://localhost:3000/dashboard`
 
 ---
 
-## ☸️ Kubernetes Deployment (Production)
-
-### 1. Infrastructure Repository
-1. Create a **separate repository** named `ai-task-infra`.
-2. Move the `k8s/` folder into that repository.
-3. Replace `YOUR_USERNAME` in `k8s/*.yaml` with your actual Docker Hub username.
-
-### 2. CI/CD with GitHub Actions
-Create these secrets in your **Application Repo** (`Ai_Task_manager`):
-- `DOCKER_HUB_USERNAME`: Your Docker account name.
-- `DOCKER_HUB_TOKEN`: Personal access token for Docker Hub.
-- `INFRA_REPO_TOKEN`: GitHub Personal Access Token (PAT) with repo permissions to push to `ai-task-infra`.
-
-The pipeline will:
-- Run Lints for JS and Python.
-- Build & Push images to Docker Hub.
-- Update `ai-task-infra` with the new image tags.
-
-### 3. Argo CD Configuration
-1. Install Argo CD to your cluster:
-   ```bash
-   kubectl create namespace argocd
-   kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-   ```
-2. Apply the Argo Application manifest:
-   ```bash
-   kubectl apply -f k8s/argo-application.yaml
-   ```
+## 🤝 Project Submission Checklist
+- [x] **Full MERN Stack**: High-performance React UI + Node.js API.
+- [x] **Python Worker**: Background processing fleet.
+- [x] **Dockerized**: Multi-stage, non-root production builds.
+- [x] **Kubernetes Ready**: Manifests for HPA, Services, and Ingress included.
+- [x] **GitOps Integrated**: Automated CD with Argo CD.
+- [x] **Cloud Native**: Pre-configured for MongoDB Atlas & Upstash Redis.
+- [x] **Security Hardened**: Helmet, Rate Limiting, and JWT encryption.
 
 ---
 
----
-
-## ☁️ Cloud Deployment (Free Tier Guide)
-
-If you don't have a Kubernetes cluster but still want the application live, here's how to host it for **FREE**:
-
-### 1. Database & Cache (Managed)
-- **MongoDB**: Create a free "Shared Cluster" on [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-free-tier).
-- **Redis**: Create a free serverless Redis instance on [Upstash](https://upstash.com/).
-
-### 2. Backend & Worker (Render.com)
-Deploy two separate **Web Services** on Render:
-1. **Connect your GitHub Repository**.
-2. **Backend (Server)**:
-   - Root Directory: `server`
-   - Build Command: `npm install`
-   - Start Command: `node src/server.js`
-   - **Env Vars**: `MONGODB_URI`, `REDIS_URL`, `JWT_SECRET`.
-3. **Worker**:
-   - Root Directory: `worker`
-   - Build Command: `pip install -r requirements.txt`
-   - Start Command: `python main.py`
-   - **Env Vars**: `MONGODB_URI`, `REDIS_URL`.
-
-### 3. Frontend (Vercel)
-- Create a new project from your repo on [Vercel](https://vercel.com/).
-- **Root Directory**: `client`
-- **Build Command**: `npm run build`
-- **Output Directory**: `dist`
-- **Env Vars**: Add **`VITE_API_URL`** pointing to your live Render Backend URL.
-
----
-
-## 📄 Architecture & Submission Details
-- **Architecture Document**: Find the full technical detail in [ARCHITECTURE.md](./ARCHITECTURE.md).
-- **Dockerfiles**: Each service uses multi-stage builds and runs as a non-root user.
-- **Monitoring**: The worker exports metrics at `/metrics` for Prometheus.
-
----
-
-## 🤝 Submission Requirements Checklist
-- [x] Application repository.
-- [x] Infrastructure repository (instructions provided).
-- [x] Docker multi-stage builds.
-- [x] Kubernetes Namespace, Deployments, Services, Ingress, HPA.
-- [x] Argo CD (GitOps) setup.
-- [x] CI/CD Workflows.
-- [x] Security (Helmet, Rate Limiting, bcrypt, JWT).
-- [x] Architecture document (2–4 pages).
-- [x] README with setup instructions.
-- [x] **Cloud-Ready**: Native support for `MONGODB_URI` and `REDIS_URL` connection strings.
+### **Author: [priyanshuKumar56](https://github.com/priyanshuKumar56)**
+*Prepared for the Full Stack Intern Assignment.*
