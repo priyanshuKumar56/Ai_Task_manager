@@ -5,22 +5,27 @@ let redisClient = null;
 let isConnected = false;
 
 const createRedisClient = () => {
-  const client = new Redis({
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    password: process.env.REDIS_PASSWORD || undefined,
-    db: parseInt(process.env.REDIS_DB || '0'),
-    maxRetriesPerRequest: 3,
+  const options = process.env.REDIS_URL
+    ? process.env.REDIS_URL
+    : {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        password: process.env.REDIS_PASSWORD || undefined,
+        db: parseInt(process.env.REDIS_DB || '0'),
+      };
+
+  const client = new Redis(options, {
+    maxRetriesPerRequest: null, // Essential for Bull
     enableReadyCheck: true,
     lazyConnect: true,
     connectTimeout: 10000,
     commandTimeout: 5000,
     retryStrategy: (times) => {
-      if (times > 10) {
+      if (times > 20) {
         logger.error('Redis max retries exceeded, giving up');
         return null; // Stop retrying
       }
-      const delay = Math.min(times * 200, 3000);
+      const delay = Math.min(times * 100, 3000);
       logger.warn(`Redis retry attempt ${times}, waiting ${delay}ms`);
       return delay;
     },

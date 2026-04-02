@@ -64,18 +64,29 @@ class Worker:
         retry=retry_if_exception_type((redis.ConnectionError, redis.TimeoutError)),
     )
     def connect_redis(self):
-        log.info("Connecting to Redis", host=self.settings.REDIS_HOST, port=self.settings.REDIS_PORT)
-        client = redis.Redis(
-            host=self.settings.REDIS_HOST,
-            port=self.settings.REDIS_PORT,
-            password=self.settings.REDIS_PASSWORD or None,
-            db=self.settings.REDIS_DB,
-            decode_responses=True,
-            socket_timeout=35,
-            socket_connect_timeout=10,
-            retry_on_timeout=True,
-            health_check_interval=30,
-        )
+        if self.settings.REDIS_URL:
+            log.info("Connecting to Redis via URL")
+            client = redis.from_url(
+                self.settings.REDIS_URL,
+                decode_responses=True,
+                socket_timeout=35,
+                socket_connect_timeout=10,
+                retry_on_timeout=True,
+                health_check_interval=30,
+            )
+        else:
+            log.info("Connecting to Redis", host=self.settings.REDIS_HOST, port=self.settings.REDIS_PORT)
+            client = redis.Redis(
+                host=self.settings.REDIS_HOST,
+                port=self.settings.REDIS_PORT,
+                password=self.settings.REDIS_PASSWORD or None,
+                db=self.settings.REDIS_DB,
+                decode_responses=True,
+                socket_timeout=35,
+                socket_connect_timeout=10,
+                retry_on_timeout=True,
+                health_check_interval=30,
+            )
         client.ping()
         log.info("Redis connected successfully")
         return client

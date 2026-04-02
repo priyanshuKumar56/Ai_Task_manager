@@ -74,6 +74,39 @@ The pipeline will:
 
 ---
 
+---
+
+## ☁️ Cloud Deployment (Free Tier Guide)
+
+If you don't have a Kubernetes cluster but still want the application live, here's how to host it for **FREE**:
+
+### 1. Database & Cache (Managed)
+- **MongoDB**: Create a free "Shared Cluster" on [MongoDB Atlas](https://www.mongodb.com/products/platform/atlas-free-tier).
+- **Redis**: Create a free serverless Redis instance on [Upstash](https://upstash.com/).
+
+### 2. Backend & Worker (Render.com)
+Deploy two separate **Web Services** on Render:
+1. **Connect your GitHub Repository**.
+2. **Backend (Server)**:
+   - Root Directory: `server`
+   - Build Command: `npm install`
+   - Start Command: `node src/server.js`
+   - **Env Vars**: `MONGODB_URI`, `REDIS_URL`, `JWT_SECRET`.
+3. **Worker**:
+   - Root Directory: `worker`
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `python main.py`
+   - **Env Vars**: `MONGODB_URI`, `REDIS_URL`.
+
+### 3. Frontend (Vercel)
+- Create a new project from your repo on [Vercel](https://vercel.com/).
+- **Root Directory**: `client`
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Env Vars**: Add **`VITE_API_URL`** pointing to your live Render Backend URL.
+
+---
+
 ## 📄 Architecture & Submission Details
 - **Architecture Document**: Find the full technical detail in [ARCHITECTURE.md](./ARCHITECTURE.md).
 - **Dockerfiles**: Each service uses multi-stage builds and runs as a non-root user.
@@ -91,3 +124,4 @@ The pipeline will:
 - [x] Security (Helmet, Rate Limiting, bcrypt, JWT).
 - [x] Architecture document (2–4 pages).
 - [x] README with setup instructions.
+- [x] **Cloud-Ready**: Native support for `MONGODB_URI` and `REDIS_URL` connection strings.

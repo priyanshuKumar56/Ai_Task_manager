@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
     REDIS_PASSWORD: str = ""
     REDIS_DB: int = 0
+    REDIS_URL: str = ""
 
     MONGODB_URI: str = "mongodb://localhost:27017/ai-task-platform"
     MONGO_DB_NAME: str = "ai-task-platform"
