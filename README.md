@@ -2,6 +2,8 @@
 
 A production-ready AI task processing platform built for high volume, scalability, and automated GitOps deployment.
 
+**🚀 Live Application: [ai-task-manager-8ajh.onrender.com](https://ai-task-manager-8ajh.onrender.com)**
+
 ## 🚀 Features
 - **MERN Stack**: Modern logic and high-performance server.
 - **Python Worker**: Background task processor (Uppercase, Lowercase, Reverse, Word Count).

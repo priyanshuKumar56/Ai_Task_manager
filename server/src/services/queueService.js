@@ -5,32 +5,43 @@ const { Task } = require('../models/Task');
 const QUEUE_NAME = 'ai-tasks';
 let taskQueue = null;
 
-const queueConfig = {
-  redis: {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379'),
-    password: process.env.REDIS_PASSWORD || undefined,
-  },
-  defaultJobOptions: {
-    removeOnComplete: { count: 100, age: 24 * 3600 },
-    removeOnFail: { count: 50, age: 7 * 24 * 3600 },
-    attempts: 3,
-    backoff: {
-      type: 'exponential',
-      delay: 2000,
-    },
-  },
-  settings: {
-    stalledInterval: 30000,       // Check stalled jobs every 30s
-    maxStalledCount: 2,           // Max times a job can be stalled
-    lockDuration: 30000,          // Job lock duration 30s
-    lockRenewTime: 15000,         // Renew lock every 15s
-    drainDelay: 300,
-  },
-};
-
 const initializeQueues = async () => {
-  taskQueue = new Bull(QUEUE_NAME, queueConfig);
+  const options = {
+    defaultJobOptions: {
+      removeOnComplete: { count: 100, age: 24 * 3600 },
+      removeOnFail: { count: 50, age: 7 * 24 * 3600 },
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 2000,
+      },
+    },
+    settings: {
+      stalledInterval: 30000,
+      maxStalledCount: 2,
+      lockDuration: 30000,
+      lockRenewTime: 15000,
+      drainDelay: 300,
+    },
+  };
+
+  if (process.env.REDIS_URL) {
+    taskQueue = new Bull(QUEUE_NAME, process.env.REDIS_URL, {
+      ...options,
+      redis: {
+        tls: process.env.REDIS_URL.startsWith('rediss://') ? {} : undefined,
+      },
+    });
+  } else {
+    taskQueue = new Bull(QUEUE_NAME, {
+      ...options,
+      redis: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        password: process.env.REDIS_PASSWORD || undefined,
+      },
+    });
+  }
 
   taskQueue.on('error', (error) => {
     logger.error({ error }, 'Bull queue error');
