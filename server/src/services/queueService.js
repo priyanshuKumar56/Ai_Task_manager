@@ -29,7 +29,8 @@ const initializeQueues = async () => {
     taskQueue = new Bull(QUEUE_NAME, process.env.REDIS_URL, {
       ...options,
       redis: {
-        tls: process.env.REDIS_URL.startsWith('rediss://') ? {} : undefined,
+        maxRetriesPerRequest: null,
+        tls: process.env.REDIS_URL.startsWith('rediss://') ? { rejectUnauthorized: false } : undefined,
       },
     });
   } else {
@@ -70,9 +71,13 @@ const initializeQueues = async () => {
   taskQueue.on('paused', () => logger.warn('Queue paused'));
   taskQueue.on('resumed', () => logger.info('Queue resumed'));
 
-  // Clean old jobs on startup
-  await taskQueue.clean(24 * 3600 * 1000, 'completed');
-  await taskQueue.clean(7 * 24 * 3600 * 1000, 'failed');
+  // Clean old jobs on startup (Wrapped in try-catch to prevent startup crash)
+  try {
+    await taskQueue.clean(24 * 3600 * 1000, 'completed');
+    await taskQueue.clean(7 * 24 * 3600 * 1000, 'failed');
+  } catch (err) {
+    logger.warn({ err }, 'Queue cleanup failed on startup - skipping cleanup');
+  }
 
   logger.info(`Bull queue '${QUEUE_NAME}' initialized`);
   return taskQueue;
