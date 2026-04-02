@@ -1,0 +1,109 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Lint Backend
+        run: |
+          cd server
+          npm ci
+          npm run lint
+
+      - name: Lint Frontend
+        run: |
+          cd client
+          npm ci
+          npm run lint
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Lint Worker
+        run: |
+          cd worker
+          pip install flake8
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+  build-and-push:
+    name: Build & Push Images
+    needs: lint
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and Push Server
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/ai-task-backend:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/ai-task-backend:${{ github.sha }}
+
+      - name: Build and Push Client
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/ai-task-frontend:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/ai-task-frontend:${{ github.sha }}
+
+      - name: Build and Push Worker
+        uses: docker/build-push-action@v5
+        with:
+          context: ./worker
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/ai-task-worker:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/ai-task-worker:${{ github.sha }}
+
+  update-manifests:
+    name: Update K8s Manifests
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Infrastructure Repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/ai-task-infra
+          token: ${{ secrets.INFRA_REPO_TOKEN }}
+          path: infra
+
+      - name: Update Image Tags
+        run: |
+          cd infra
+          sed -i "s|image: .*/ai-task-backend:.*|image: ${{ secrets.DOCKER_HUB_USERNAME }}/ai-task-backend:${{ github.sha }}|g" k8s/backend-deployment.yaml
+          sed -i "s|image: .*/ai-task-frontend:.*|image: ${{ secrets.DOCKER_HUB_USERNAME }}/ai-task-frontend:${{ github.sha }}|g" k8s/client-deployment.yaml
+          sed -i "s|image: .*/ai-task-worker:.*|image: ${{ secrets.DOCKER_HUB_USERNAME }}/ai-task-worker:${{ github.sha }}|g" k8s/worker-deployment.yaml
+          
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git add .
+          git commit -m "Deploy version ${{ github.sha }}"
+          git push
