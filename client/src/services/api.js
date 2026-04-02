@@ -33,7 +33,9 @@ api.interceptors.request.use(
         if (state?.accessToken) {
           config.headers['Authorization'] = `Bearer ${state.accessToken}`;
         }
-      } catch {}
+      } catch (error) {
+        // Safe to ignore if JSON.parse fails
+      }
     }
     return config;
   },
@@ -107,7 +109,13 @@ export const taskApi = {
 export const authApi = {
   login: (data) => api.post('/auth/login', data),
   register: (data) => api.post('/auth/register', data),
-  logout: () => api.post('/auth/logout'),
+  logout: async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      // Ignore logout error if token already invalid
+    }
+  },
   refresh: (data) => api.post('/auth/refresh', data),
   me: () => api.get('/auth/me'),
 };

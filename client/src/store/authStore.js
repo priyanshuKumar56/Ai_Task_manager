@@ -50,7 +50,9 @@ const useAuthStore = create(
       logout: async () => {
         try {
           await api.post('/auth/logout');
-        } catch {}
+        } catch (error) {
+          // Ignore logout error if token already invalid
+        }
         get().clearAuth();
       },
 
